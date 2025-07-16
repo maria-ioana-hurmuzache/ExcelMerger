@@ -7,25 +7,20 @@ st.set_page_config(page_title="Excel Merger", layout="centered")
 st.title("Excel Item Price Merger")
 
 
-# Upload Main File (File A)
-main_files = st.file_uploader("Upload Main File (Item List)", type=["xlsx"], accept_multiple_files=True)
+main_files = st.file_uploader("Incarca aici fisierela care trebuie completate", type=["xlsx"], accept_multiple_files=True)
 
 # Upload Price File (File B)
-price_file = st.file_uploader("Upload Price File (with Item Code + Price)", type=["xlsx"])
+price_file = st.file_uploader("Incarca aici fisierul cu preturi", type=["xlsx"])
 
 if main_files and price_file:
-    st.success(f"{len(main_files)} file(s) loaded for merging.")
+    st.success(f"{len(main_files)} fisiere incarcate pentru completare.")
 
     # Optional: sheet selection
     price_sheets = pd.ExcelFile(price_file).sheet_names
-    selected_sheets = st.multiselect("Select Sheets to Extract Prices From", price_sheets, default=price_sheets[:2])
+    selected_sheets = price_sheets[:2]
 
-    if st.button("Merge and Generate File"):
+    if st.button("Genereaza fisierele completate"):
         try:
-            # Load Main File
-            # df_main = pd.read_excel(main_files)
-
-            # Combine prices from selected sheets
             df_prices_combined = pd.DataFrame()
             for sheet in selected_sheets:
                 df = pd.read_excel(price_file, sheet_name=sheet, skiprows=7)
@@ -38,7 +33,7 @@ if main_files and price_file:
                     pass
 
             if df_prices_combined.empty:
-                st.error("No valid data found in selected sheets.")
+                st.error("Nu s-au gasit date in fisierul cu preturi.")
             else:
                 zip_buffer = io.BytesIO()
                 # Merge
@@ -64,6 +59,6 @@ if main_files and price_file:
                         new_filename = file.name.replace('.xlsx', '_merged.xlsx')
                         zip_file.writestr(new_filename, output.read())
                 zip_buffer.seek(0)
-                st.download_button(label="Download All files as a ZIP", data=zip_buffer, file_name="merged_files.zip", mime="application/zip")
+                st.download_button(label="Descarca arhiva ZIP cu fisierele completate", data=zip_buffer, file_name="merged_files.zip", mime="application/zip")
         except Exception as e:
             st.error(f"Error: {e}")

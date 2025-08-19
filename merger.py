@@ -43,11 +43,11 @@ if main_files and price_file:
                         df_result = pd.merge(df_main, df_prices_combined, on='Item Code', how='left')
 
                         # Fill existing price fields
-                        if 'ITEM Price' in df_result.columns:
-                            df_result['ITEM Price'] = df_result['Pret']
+                        if 'UNIT Price' in df_result.columns:
+                            df_result['UNIT Price'] = df_result['Pret']
 
                         if 'Quantity in Bucket' in df_result.columns:
-                            df_result['Total Price'] = df_result['ITEM Price'] * df_result['Quantity in Bucket']
+                            df_result['Total Price'] = df_result['UNIT Price'] * df_result['Quantity in Bucket']
 
                         # Drop helper column
                         df_result.drop(columns=['Pret'], inplace=True)

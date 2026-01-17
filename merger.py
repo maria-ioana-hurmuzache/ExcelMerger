@@ -37,8 +37,9 @@ if main_files and price_file:
 
                     df_clean = df_clean[['Item Code', 'Pret']]
                     df_prices_combined = pd.concat([df_prices_combined, df_clean], ignore_index=True)
-                except:
-                    pass
+                except Exception as e:
+                    st.warning(f"Eroare la procesarea foii '{sheet}': {e}")
+                    
 
             if df_prices_combined.empty:
                 st.error("Nu s-au găsit date în fișierul cu prețuri.")
@@ -51,12 +52,11 @@ if main_files and price_file:
                         df_result = pd.merge(df_main, df_prices_combined, on='Item Code', how='left')
 
                         # Fill existing price fields
-                        if 'UNIT Price' in df_result.columns:
-                            df_result['UNIT Price'] = df_result['Pret']
+                        if 'Unit Price' in df_result.columns:
+                            df_result['Unit Price'] = df_result['Pret']
 
-                        if 'Quantity in Bucket' in df_result.columns:
-                            df_result['Total Price'] = df_result['UNIT Price'] * df_result['Quantity in Bucket']
-
+                        if 'Quantity' in df_result.columns:
+                            df_result['Total Price'] = df_result['Unit Price'] * df_result['Quantity']
                         # Drop helper column
                         df_result.drop(columns=['Pret'], inplace=True)
 

@@ -50,14 +50,26 @@ if main_files and price_file:
                     for file in main_files:
                         file.seek(0)
                         df_main = pd.read_excel(file, engine='openpyxl')
-                        df_result = pd.merge(df_main, df_prices_combined, on='Item Code', how='left')
+                        
+                        # --- MODIFICARE PENTRU COLOANE DINAMICE ---
+                        cols = df_main.columns.tolist()
+                        # Găsim numele real al coloanei 'Item Code' (case insensitive)
+                        actual_item_col = next((c for c in cols if c.lower().strip() == 'item code'), 'Item Code')
+                        # Găsim numele real al coloanei 'Unit Price' (case insensitive)
+                        actual_unit_price_col = next((c for c in cols if c.lower().strip() == 'unit price'), 'Unit Price')
+                        # Găsim numele real al coloanei care începe cu 'Quantity' (case insensitive)
+                        actual_quantity_col = next((c for c in cols if c.lower().strip().startswith('quantity')), 'Quantity')
+                        actual_total_price_col = next((c for c in cols if c.lower().strip() == 'total price'), 'Total Price')
+                        # ------------------------------------------                        
+                        
+                        df_result = pd.merge(df_main, df_prices_combined, on=actual_item_col, how='left')
 
                         # Fill existing price fields
-                        if 'Unit Price' in df_result.columns:
-                            df_result['Unit Price'] = df_result['Pret']
+                        if actual_unit_price_col in df_result.columns:
+                            df_result[actual_unit_price_col] = df_result['Pret']
 
-                        if 'Quantity' in df_result.columns:
-                            df_result['Total Price'] = df_result['Unit Price'] * df_result['Quantity']
+                        if actual_quantity_col in df_result.columns:
+                            df_result[actual_total_price_col] = df_result[actual_unit_price_col] * df_result[actual_quantity_col]
                         # Drop helper column
                         df_result.drop(columns=['Pret'], inplace=True)
 

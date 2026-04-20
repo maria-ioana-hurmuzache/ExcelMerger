@@ -14,7 +14,7 @@ price_file = st.file_uploader("Încarcă aici fișierul cu prețuri", type=["xls
 
 if main_files and price_file:
     st.success(f"{len(main_files)} fișiere încărcate pentru completare.")
-
+    price_file.seek(0)
     # Optional: sheet selection
     price_sheets = pd.ExcelFile(price_file, engine='openpyxl').sheet_names
     selected_sheets = price_sheets[:2]
@@ -25,7 +25,7 @@ if main_files and price_file:
             for sheet in selected_sheets:
                 df = pd.read_excel(price_file, sheet_name=sheet, skiprows=7, engine='openpyxl')
                 try:
-                    exchange_rate_df = pd.read_excel(price_file, sheet_name=sheet, header=None, nrows=3, usecols="C")
+                    exchange_rate_df = pd.read_excel(price_file, sheet_name=sheet, header=None, nrows=3, usecols="C", engine='openpyxl')
                     exchange_rate = pd.to_numeric(exchange_rate_df.iloc[1, 0], errors='coerce')
 
                     df_clean = df[['Unnamed: 1', 'EUR fara TVA']].copy()
@@ -48,6 +48,7 @@ if main_files and price_file:
                 # Merge
                 with zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as zip_file:
                     for file in main_files:
+                        file.seek(0)
                         df_main = pd.read_excel(file, engine='openpyxl')
                         df_result = pd.merge(df_main, df_prices_combined, on='Item Code', how='left')
 
